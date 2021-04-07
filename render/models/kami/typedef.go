@@ -1,8 +1,9 @@
 package kami
 
 import (
-	"github.com/go-gl/mathgl/mgl32"
 	"kami/render"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 type Model struct {
@@ -10,11 +11,15 @@ type Model struct {
 }
 
 type ModelPart struct {
-	Name string
+	Name     string
 	Position mgl32.Vec3
 	Rotation mgl32.Quat
 
 	Vao render.VertexArrayObject
-	Vertices, TextureCoords, Normals []float32
+
+	Vertices      []float32
+	TextureCoords []float32
+	Normals       []float32
+
 	Indices []uint32
 }

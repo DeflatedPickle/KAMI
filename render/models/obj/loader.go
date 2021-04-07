@@ -3,14 +3,15 @@ package obj
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-gl/mathgl/mgl32"
 	"io"
 	"kami/render/models/kami"
 	"kami/util"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func LoadModel(file string) kami.Model {
-	objData := util.ReadAsset(file)
+	objData := util.ReadFile(file)
 	objReader := bytes.NewReader(objData)
 	modelPart := kami.ModelPart{}
 

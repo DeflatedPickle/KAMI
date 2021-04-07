@@ -1,25 +1,8 @@
 package util
 
 import (
-	"fmt"
 	"io/ioutil"
-	"kami/resources"
 )
-
-func SReadAsset(path string) string {
-	return string(ReadAsset(path))
-}
-
-func AssetExists(path string) bool {
-	_, err := resources.AssetInfo(path)
-	return err == nil
-}
-
-func ReadAsset(path string) []byte {
-	data, err := resources.Asset(path)
-	FCheckErr(err, fmt.Sprintf("asset file %v does not exist!", path))
-	return data
-}
 
 func SReadFile(path string) string {
 	return string(ReadFile(path))
@@ -39,6 +22,3 @@ func CheckReadFile(path string) (string, error) {
 
 	return string(data), nil
 }
-
-
-

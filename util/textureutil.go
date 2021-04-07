@@ -2,14 +2,15 @@ package util
 
 import (
 	"bytes"
-	"github.com/go-gl/gl/all-core/gl"
 	"image"
 	"image/draw"
 	"image/png"
+
+	"github.com/go-gl/gl/all-core/gl"
 )
 
 func LoadTexture(fileName string) uint32 {
-	data := ReadAsset(fileName)
+	data := ReadFile(fileName)
 	img, err := png.Decode(bytes.NewReader(data))
 	if err != nil {
 		CheckErr(err)

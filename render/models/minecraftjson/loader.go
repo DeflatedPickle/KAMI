@@ -2,16 +2,17 @@ package minecraftjson
 
 import (
 	"encoding/json"
-	"github.com/go-gl/mathgl/mgl32"
 	"kami/render/models/kami"
 	"kami/util"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func LoadModel(path string) kami.Model {
 	modelString, _ := util.CheckReadFile(path)
 
 	if len(modelString) <= 0 {
-		modelString = util.SReadAsset(path)
+		modelString = util.SReadFile(path)
 	}
 
 	var jsonFormat Serialized
@@ -70,7 +71,7 @@ func GenerateFace(from, to mgl32.Vec3, uv []float32, vertices, normals *[]float3
 		faceVerts = append(faceVerts, endPoint.X())
 		faceVerts = append(faceVerts, endPoint.Y())
 		faceVerts = append(faceVerts, endPoint.Z())
-	}else {
+	} else {
 		faceVerts = append(faceVerts, startPoint.X())
 		faceVerts = append(faceVerts, startPoint.Y())
 		faceVerts = append(faceVerts, endPoint.Z())
@@ -97,8 +98,8 @@ func GenerateFace(from, to mgl32.Vec3, uv []float32, vertices, normals *[]float3
 	*vertices = append(*vertices, faceVerts...)
 	*normals = append(*normals, faceNormals...)
 
-	*textureCoords = append(*textureCoords, uv[0] / 16, uv[1] / 16, uv[2] / 16, uv[3] / 16, uv[2] / 16, uv[1] / 16)
-	*textureCoords = append(*textureCoords, uv[0] / 16, uv[1] / 16, uv[2] / 16, uv[3] / 16, uv[0] / 16, uv[3] / 16)
+	*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[2]/16, uv[1]/16)
+	*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[0]/16, uv[3]/16)
 
 	if len(*vertices) >= 18 {
 		for i := 0; i < 18; i++ {
@@ -113,7 +114,7 @@ func GenerateModelData(model *Serialized) {
 	var normals []float32
 	var indices []uint32
 
-	for index, element := range model.Elements  {
+	for index, element := range model.Elements {
 		startVertex := mgl32.Vec3{element.From[0], element.From[1], element.From[2]}
 		endVertex := mgl32.Vec3{element.To[0], element.To[1], element.To[2]}
 
