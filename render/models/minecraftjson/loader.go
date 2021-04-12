@@ -5,33 +5,66 @@ import (
 	"kami/render/models/kami"
 	"kami/util"
 
+	"github.com/bradfitz/iter"
+	"github.com/gammazero/deque"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-func LoadModel(path string) kami.Model {
+func FigureOutModel(path, modelString string) *deque.Deque {
+	var stack deque.Deque
+
+	var jsonFormat Serialized
+	json.Unmarshal([]byte(modelString), &jsonFormat)
+
+	stack.PushBack(&jsonFormat)
+
+	for stack.Back().(*Serialized).Parent != "" {
+		loopVar := stack.Back()
+		partPath, _ := util.SplitAt(path, "assets/", util.BEFORE)
+
+		parentString := LoadFile(partPath + util.SExpandPath(loopVar.(*Serialized).Parent) + ".json")
+
+		var parentFormat Serialized
+		json.Unmarshal([]byte(parentString), &parentFormat)
+
+		stack.PushBack(&parentFormat)
+	}
+
+	return &stack
+}
+
+func LoadFile(path string) string {
 	modelString, _ := util.CheckReadFile(path)
 
 	if len(modelString) <= 0 {
 		modelString = util.SReadFile(path)
 	}
 
-	var jsonFormat Serialized
-	json.Unmarshal([]byte(modelString), &jsonFormat)
+	return modelString
+}
 
-	GenerateModelData(&jsonFormat)
+func LoadModel(path string) kami.Model {
+	modelString := LoadFile(path)
+
 	model := kami.Model{}
 
-	for _, element := range jsonFormat.Elements {
-		part := kami.ModelPart{
-			Name:          element.Name,
-			Vertices:      element.Vertices,
-			TextureCoords: element.TextureCoords,
-			Normals:       element.Normals,
-			Indices:       element.Indices,
-		}
+	modelStack := FigureOutModel(path, modelString)
+	for i := range iter.N(modelStack.Len()) {
+		cur := modelStack.At(i).(*Serialized)
+		GenerateModelData(cur)
 
-		part.GenerateModelVAO()
-		model.Parts = append(model.Parts, part)
+		for _, element := range cur.Elements {
+			part := kami.ModelPart{
+				Name:          element.Name,
+				Vertices:      element.Vertices,
+				TextureCoords: element.TextureCoords,
+				Normals:       element.Normals,
+				Indices:       element.Indices,
+			}
+
+			part.GenerateModelVAO()
+			model.Parts = append(model.Parts, part)
+		}
 	}
 
 	return model
@@ -98,8 +131,12 @@ func GenerateFace(from, to mgl32.Vec3, uv []float32, vertices, normals *[]float3
 	*vertices = append(*vertices, faceVerts...)
 	*normals = append(*normals, faceNormals...)
 
-	*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[2]/16, uv[1]/16)
-	*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[0]/16, uv[3]/16)
+	if len(uv) > 0 {
+		*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[2]/16, uv[1]/16)
+		*textureCoords = append(*textureCoords, uv[0]/16, uv[1]/16, uv[2]/16, uv[3]/16, uv[0]/16, uv[3]/16)
+	} else {
+		*textureCoords = append(*textureCoords, 0, 0, 0, 0, 0, 0)
+	}
 
 	if len(*vertices) >= 18 {
 		for i := 0; i < 18; i++ {
